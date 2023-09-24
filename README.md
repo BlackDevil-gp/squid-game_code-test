@@ -1,4 +1,11 @@
-# Getting Started with Create React App
+# This app is a code test by Krea.
+
+### App Name: Squid Game Number Draw
+
+### Description:
+Squid Game Number Draw is an interactive web app that lets you play a thrilling numbers game inspired by the popular TV series "Squid Game." Draw numbers, complete game boards, and calculate your score. Challenge your luck and see if you can win!
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
