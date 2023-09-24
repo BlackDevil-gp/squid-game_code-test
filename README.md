@@ -3,7 +3,7 @@
 ### App Name: Squid Game Number Draw
 
 ### Description:
-Squid Game Number Draw is an interactive web app that lets you play a thrilling numbers game inspired by the popular TV series "Squid Game." Draw numbers, complete game boards, and calculate your score. Challenge your luck and see if you can win!
+Squid Game Number Draw is an interactive web app that lets you play a thrilling numbers." Draw numbers, complete game boards, and calculate your score. Challenge your luck and see if you can win!
 
 ## Getting Started with Create React App
 
