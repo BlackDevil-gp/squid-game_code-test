@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import { defaultDrawNumbers } from "./utils/defaultDrawNumber";
-import { defaultBoards } from "./utils/defaultBoards";
+// import { defaultBoards } from "./utils/defaultBoards";
+import { defaultRawBoards } from "./utils/defaultRawBoards";
 import axios from "axios";
 import ToastMsg from "./components/ToastMsg";
 
@@ -13,7 +14,8 @@ interface ResponseData {
 
 function App(): JSX.Element {
   const [drawNumbers, setDrawNumbers] = useState<number[]>([]);
-  const [boards, setBoards] = useState<number[][][]>(defaultBoards);
+  // const [boards, setBoards] = useState<number[][][]>(defaultBoards);
+  const [boards, setBoards] = useState<number[][][]>([]);
   const [indexDrawNumber, setIndexDrawNumber] = useState<number>(0);
   const [gameEnd, setGameEnd] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
@@ -24,6 +26,13 @@ function App(): JSX.Element {
   const [name, setName] = useState<string>("");
   const [responseData, setResponseData] = useState<ResponseData | null>(null);
   const [showToast, setShowToast] = useState<boolean>(false);
+
+  // Build the board from raw data
+  useEffect(() => {
+    setTimeout(() => {
+      convertTextToArrays();
+    }, 500);
+  }, []);
 
   useEffect(() => {
     checkAndRemoveBoardWins();
@@ -175,10 +184,11 @@ function App(): JSX.Element {
     setGameEnd(false);
     setIndexDrawNumber(0);
     setDrawNumbers([]);
-    setBoards(defaultBoards);
+    // setBoards(defaultBoards);
+    convertTextToArrays();
     setLoadingNumbers(false);
     setResponseData(null);
-    setName('');
+    setName("");
   }
 
   // Handle form submission and show the response with toast msg
@@ -210,6 +220,35 @@ function App(): JSX.Element {
       });
 
     setShowToast(true);
+  }
+
+  // Function to convert raw data into arrays
+  function convertTextToArrays() {
+    // Split the defaultRawBoards text by lines and remove empty lines
+    const lines = defaultRawBoards.split("\n").filter(Boolean);
+
+    const arrays: number[][][] = [];
+
+    // Loop through the lines, processing 5 lines at a time
+    for (let i = 0; i < lines.length; i += 5) {
+      const subArray: number[][] = [];
+
+      // Loop through the current set of 5 rows
+      for (let j = i; j < i + 5 && j < lines.length; j++) {
+        const row = lines[j]
+          .split(/\s+/) // Split the line by spaces or double spaces
+          .map((str) => parseInt(str, 10)) // Convert each number to an integer
+          .filter((num) => !isNaN(num)); // Filter out any NaN values (empty spaces)
+
+        // Add the processed row to the subArray
+        subArray.push(row);
+      }
+
+      // Add the subArray of 5 rows to the arrays array
+      arrays.push(subArray);
+    }
+
+    setBoards(arrays);
   }
 
   return (
@@ -244,27 +283,33 @@ function App(): JSX.Element {
         </div>
       </header>
       {/* Boards */}
-      <div className="d-flex flex-wrap justify-content-center">
-        {boards.map(
-          (board, index) =>
-            board.length > 1 && (
-              <div key={index} className="m-3">
-                <span className="text-light">Board: {index + 1}</span>
-                <div style={{ width: 150, height: 150 }} className="bg-secondary p-1 rounded-2 d-flex flex-column justify-content-between">
-                  {board.map((boardRow, index) => (
-                    <div key={index} className="d-flex justify-content-between">
-                      {boardRow.map((boardRowNumber) => (
-                        <span key={boardRowNumber} className={checkDrawNumber(boardRowNumber) ? "text-danger fw-bold" : "text-light"}>
-                          {boardRowNumber}
-                        </span>
-                      ))}
-                    </div>
-                  ))}
+      {boards.length > 1 ? (
+        <div className="d-flex flex-wrap justify-content-center">
+          {boards.map(
+            (board, index) =>
+              board.length > 1 && (
+                <div key={index} className="m-3">
+                  <span className="text-light">Board: {index + 1}</span>
+                  <div style={{ width: 150, height: 150 }} className="bg-secondary p-1 rounded-2 d-flex flex-column justify-content-between">
+                    {board.map((boardRow, index) => (
+                      <div key={index} className="d-flex justify-content-between">
+                        {boardRow.map((boardRowNumber) => (
+                          <span key={boardRowNumber} className={checkDrawNumber(boardRowNumber) ? "text-danger fw-bold" : "text-light"}>
+                            {boardRowNumber}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )
-        )}
-      </div>
+              )
+          )}
+        </div>
+      ) : (
+        <div className="mt-5">
+          <span className="spinner-border"></span>
+        </div>
+      )}
       {/* Win Modal */}
       <div className="modal custom-modal-backdrop" tabIndex={-1} role="dialog" style={{ display: gameEnd ? "block" : "none" }}>
         <div className="modal-dialog modal-dialog-centered" role="document">
@@ -279,15 +324,16 @@ function App(): JSX.Element {
                   <span className="spinner-border"></span>
                 </div>
               ) : (
-                <h5 className="my-2">
-                  Greg lost from the giant squid. The score of the last board is: <strong>{score}</strong>
-                </h5>
+                <div>
+                  <h5 className="my-2">You lost from the giant squid!</h5>
+                  <h5 className="my-2">
+                    The score of the last board is: <strong>{score}</strong>
+                  </h5>
+                </div>
               )}
             </div>
             <div className="modal-footer flex-column d-flex justify-content-center">
-              {responseData?.data ? (
-                null
-              ) : (
+              {responseData?.data ? null : (
                 <button
                   disabled={loadingScore}
                   type="button"
